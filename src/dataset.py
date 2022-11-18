@@ -16,7 +16,7 @@ class VideoLanguageDataset(Dataset):
         self.frames_language_pairs_dev = []
 
         for p in self.frames_language_pairs:
-            if p.split("\t")[0].split("/")[0] in {249, 300, 958, 1280, 1473}:
+            if int(p.split("\t")[0].split("/")[0]) in {249, 300, 958, 1280, 1473}:
                 self.frames_language_pairs_dev.append(p + "\t1")
             else:
                 self.frames_language_pairs_train.append(p + "\t1")
@@ -25,7 +25,7 @@ class VideoLanguageDataset(Dataset):
             self.frames_language_pairs = self.frames_language_pairs_train
         else:
             self.frames_language_pairs = self.frames_language_pairs_dev
-        
+
         self.frames_language_pairs_neg = []
         for p in self.frames_language_pairs:
             video = p.split("\t")[0]
@@ -73,7 +73,7 @@ class VideoLanguageDataset(Dataset):
 
 # HOW TO USE
 if __name__ == "__main__":
-    dataset = VideoLanguageDataset()
+    dataset = VideoLanguageDataset(mode="dev", use_video_embedding=True)
     dataloader = DataLoader(dataset=dataset, batch_size=5)
 
     for batch in dataloader:
