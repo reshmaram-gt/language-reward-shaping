@@ -11,7 +11,28 @@ class VideoLanguageDataset(Dataset):
 
         with open(os.path.join("data", "atari-lang", "annotations.txt")) as f:
             self.frames_language_pairs = f.readlines()
+
+        self.frames_language_pairs_train = []
+        self.frames_language_pairs_dev = []
+
+        for p in self.frames_language_pairs:
+            if p.split("\t")[0].split("/")[0] in {249, 300, 958, 1280, 1473}:
+                self.frames_language_pairs_dev.append(p + "\t1")
+            else:
+                self.frames_language_pairs_train.append(p + "\t1")
         
+        if mode == "train":
+            self.frames_language_pairs = self.frames_language_pairs_train
+        else:
+            self.frames_language_pairs = self.frames_language_pairs_dev
+        
+        self.frames_language_pairs_neg = []
+        for p in self.frames_language_pairs:
+            video = p.split("\t")[0]
+            language = self.frames_language_pairs[torch.randint(0, len(self.frames_language_pairs), size=(1,))].split("\t")[0].split("/")[1]
+            self.frames_language_pairs_neg.append(f"{video}\t{language}\t0")
+
+        self.frames_language_pairs.extend(self.frames_language_pairs_neg)
 
     def __len__(self):
         return len(self.frames_language_pairs)
@@ -23,6 +44,7 @@ class VideoLanguageDataset(Dataset):
         frame_idx_end = int(regex_result[2])
 
         language = self.frames_language_pairs[idx].split("\t")[1].strip()
+        label = int(self.frames_language_pairs[idx].split("\t")[2])
 
         if not self.use_video_embedding:
             # retrieve frames from disk
@@ -46,7 +68,7 @@ class VideoLanguageDataset(Dataset):
             return data
         else:
             embedding = torch.load(os.path.join("data", "embedding", f"{frames_address}-{frame_idx_start}-{frame_idx_end}.pt"))
-            return {"video_embedding": embedding, "language": language}
+            return {"video_embedding": embedding, "language": language, "label": label}
 
 
 # HOW TO USE
