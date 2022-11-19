@@ -29,6 +29,7 @@ with tqdm(dataloader, unit="batch") as pbar:
         text_encoding = text_encoder(**tokenied_text).last_hidden_state
         output = model(batch["video_embedding"].to(device), text_encoding.to(device))
         optimizer.zero_grad()
+        print(batch["label"])
         loss = BCEWithLogitsLoss()(output, batch["label"].reshape(-1, 1).float().to(device))
         batch_accuray = torch.sum(torch.where(output > 0.5, 1, 0).reshape(-1).to(device) == batch["label"].reshape(-1).to(device)) / 64
         pbar.set_postfix(loss=loss.item(), batch_accuracy=batch_accuray.item())
