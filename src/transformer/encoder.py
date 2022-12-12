@@ -79,6 +79,6 @@ class TransformerEncoder(nn.Module):
     def forward(self, x: torch.FloatTensor, mask: torch.ByteTensor) -> torch.FloatTensor:
         last_hidden_states = self.encoder(self.position_encoding(x).to("cuda"), mask)
         averaged_last_hidden_states = torch.mean(last_hidden_states, dim=1)
-        output = self.prediction(averaged_last_hidden_states)
+        # output = self.prediction(averaged_last_hidden_states)
         
-        return output 
+        return averaged_last_hidden_states 
